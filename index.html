@@ -1,515 +1,293 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Stress Test — /predict_cif_batch</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sendas de Gracia</title>
+  <meta name="description" content="Iglesia Sendas de Gracia — Una comunidad para crecer en la Palabra, la gracia y la comunión." />
+  <style>
+    :root {
+      --bg: #f8f6f1;
+      --paper: #fffdf9;
+      --ink: #1d2430;
+      --muted: #637083;
+      --line: #e7dfd2;
+      --gold: #b08a49;
+      --gold-soft: #f0e4c7;
+      --navy: #1f314a;
+      --navy-soft: #2e4769;
+      --shadow: 0 18px 48px rgba(31, 49, 74, 0.09);
+      --radius: 22px;
+      --max: 1140px;
+    }
     * { box-sizing: border-box; }
-    html, body {
-        margin: 0;
-        padding: 0;
-        background: #fafbfc;
-        color: #1f2933;
-        font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-        font-size: 16px;
-        line-height: 1.55;
-        -webkit-font-smoothing: antialiased;
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
     }
-    .tabular { font-variant-numeric: tabular-nums; }
-
-    /* ===== HERO ===== */
-    .hero {
-        background: linear-gradient(180deg, #f3f9f5 0%, #ffffff 100%);
-        border-bottom: 1px solid #e4ebe6;
-        padding: 56px 24px 64px;
-        text-align: center;
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; }
+    .site-header {
+      position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px);
+      background: rgba(248, 246, 241, 0.82); border-bottom: 1px solid rgba(231, 223, 210, 0.7);
     }
-    .hero-inner {
-        max-width: 1040px;
-        margin: 0 auto;
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 76px; }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 700; letter-spacing: -0.02em; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(145deg, var(--gold-soft), #fff7e9); color: var(--gold);
+      border: 1px solid #ead9b4; box-shadow: 0 6px 20px rgba(176, 138, 73, 0.18); font-size: 20px;
     }
-    .verdict-pill {
-        display: inline-block;
-        background: #1f7a4c;
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: 650;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        padding: 10px 22px;
-        border-radius: 999px;
-        box-shadow: 0 4px 14px rgba(31, 122, 76, 0.25);
-        margin-bottom: 28px;
+    .brand small {
+      display: block; font-size: 12px; color: var(--muted); font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
     }
-    .hero h1 {
-        font-size: 56px;
-        line-height: 1.1;
-        font-weight: 700;
-        color: #0f2a1e;
-        letter-spacing: -1px;
-        margin: 0 auto 18px;
-        max-width: 900px;
+    .nav-links { display: flex; gap: 24px; color: var(--muted); font-size: 15px; }
+    .nav-links a:hover { color: var(--navy); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border-radius: 999px; padding: 13px 20px; font-weight: 700; font-size: 15px;
+      border: 1px solid transparent; transition: 0.2s ease;
     }
-    .hero h1 em {
-        font-style: normal;
-        background: linear-gradient(180deg, transparent 65%, #bfe4cc 65%);
-        padding: 0 4px;
+    .btn-primary { background: var(--navy); color: white; box-shadow: 0 12px 24px rgba(31, 49, 74, 0.18); }
+    .btn-primary:hover { background: var(--navy-soft); }
+    .btn-secondary { border-color: var(--line); background: rgba(255,255,255,0.7); color: var(--navy); }
+    .hero { padding: 48px 0 28px; }
+    .hero-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 34px; align-items: stretch; }
+    .hero-copy, .hero-card, .card, .schedule, .verse, .footer-panel {
+      background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
     }
-    .hero .sub-hint {
-        font-size: 15px;
-        color: #5a6778;
-        margin: 8px 0 40px;
-        letter-spacing: 0.2px;
+    .hero-copy {
+      padding: 56px; background: radial-gradient(circle at top left, rgba(240, 228, 199, 0.9), transparent 32%), linear-gradient(180deg, #fffdf9, #fbf8f1);
     }
-    .kpi-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 18px;
-        max-width: 960px;
-        margin: 0 auto;
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 999px;
+      background: #f6efdf; color: #8f6a2f; font-size: 12px; font-weight: 800; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 18px;
     }
-    .kpi {
-        background: #ffffff;
-        border: 1px solid #e3e8ef;
-        border-radius: 14px;
-        padding: 28px 18px;
-        box-shadow: 0 1px 3px rgba(20, 35, 60, 0.04);
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      font-size: clamp(38px, 5vw, 72px); line-height: 1.04; letter-spacing: -0.045em; margin-bottom: 18px;
+      color: var(--navy); max-width: 12ch;
     }
-    .kpi .icon {
-        font-size: 26px;
-        margin-bottom: 6px;
+    .lead { font-size: 18px; color: var(--muted); max-width: 58ch; margin-bottom: 28px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+    .hero-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .meta-item { padding: 16px; border-radius: 18px; background: rgba(255,255,255,0.72); border: 1px solid #efe6d8; }
+    .meta-label {
+      font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
     }
-    .kpi .value {
-        font-size: 68px;
-        font-weight: 700;
-        line-height: 1;
-        color: #1f7a4c;
-        letter-spacing: -2px;
-        font-variant-numeric: tabular-nums;
-        margin: 6px 0 8px;
+    .meta-value { font-size: 16px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+    .hero-card { overflow: hidden; display: flex; flex-direction: column; }
+    .hero-visual {
+      min-height: 350px; background: linear-gradient(180deg, rgba(31,49,74,0.1), rgba(31,49,74,0.3)), radial-gradient(circle at 20% 20%, rgba(255,255,255,0.25), transparent 24%), linear-gradient(135deg, #8fa7b0, #526b7d 46%, #26364d);
+      position: relative; isolation: isolate;
     }
-    .kpi.neutral .value { color: #1a2b45; }
-    .kpi .label {
-        font-size: 12.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #5a6778;
-        font-weight: 600;
+    .hero-visual::after {
+      content: ""; position: absolute; inset: auto 24px 24px auto; width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(240,228,199,0.5), transparent 68%); filter: blur(6px); z-index: -1;
     }
-
-    /* ===== BODY WRAPPER ===== */
-    .wrapper {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 56px 28px 60px;
+    .visual-overlay {
+      position: absolute; inset: auto 22px 22px 22px; background: rgba(255, 253, 249, 0.9);
+      border: 1px solid rgba(231, 223, 210, 0.85); border-radius: 20px; padding: 18px; backdrop-filter: blur(8px);
     }
-    section { margin-bottom: 56px; }
-    section h2 {
-        font-size: 26px;
-        font-weight: 700;
-        color: #0f2a1e;
-        letter-spacing: -0.4px;
-        margin: 0 0 18px;
+    .visual-overlay strong { display: block; color: var(--navy); margin-bottom: 4px; font-size: 18px; }
+    .visual-overlay span { color: var(--muted); font-size: 14px; }
+    .hero-body { padding: 24px 24px 26px; }
+    .hero-body h3 { margin-bottom: 8px; color: var(--navy); font-size: 23px; }
+    .hero-body p { color: var(--muted); margin-bottom: 0; }
+    main section { padding: 26px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 20px; }
+    .section-head h2 { font-size: clamp(28px, 3vw, 42px); color: var(--navy); letter-spacing: -0.04em; margin-bottom: 8px; }
+    .section-head p { max-width: 58ch; color: var(--muted); margin-bottom: 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .card { padding: 26px; }
+    .card-icon {
+      width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px;
+      background: #f7f0e2; color: var(--gold); font-size: 22px; margin-bottom: 16px;
     }
-    section h2 .num {
-        display: inline-block;
-        background: #e4ebe6;
-        color: #1f7a4c;
-        font-size: 13px;
-        font-weight: 700;
-        width: 28px;
-        height: 28px;
-        line-height: 28px;
-        text-align: center;
-        border-radius: 999px;
-        margin-right: 10px;
-        vertical-align: middle;
+    .card h3 { color: var(--navy); font-size: 21px; margin-bottom: 10px; }
+    .card p { color: var(--muted); margin-bottom: 0; }
+    .schedule { padding: 26px; }
+    .schedule-list { display: grid; gap: 14px; }
+    .schedule-item {
+      display: grid; grid-template-columns: 120px 1fr auto; gap: 18px; align-items: center;
+      padding: 18px; border-radius: 18px; background: #fcfaf5; border: 1px solid #efe5d5;
     }
-    section p { color: #34404f; margin: 0 0 12px; }
-
-    /* ===== QUOTE ===== */
-    .quote {
-        background: #ffffff;
-        border: 1px solid #e3e8ef;
-        border-left: 4px solid #2b4c7c;
-        border-radius: 10px;
-        padding: 22px 26px 24px;
-        margin-bottom: 20px;
+    .schedule-day { font-weight: 800; color: var(--navy); }
+    .schedule-title { color: var(--ink); font-weight: 700; }
+    .schedule-sub { color: var(--muted); font-size: 14px; }
+    .schedule-time { color: var(--gold); font-weight: 800; white-space: nowrap; }
+    .verse {
+      padding: 34px; background: radial-gradient(circle at top right, rgba(240,228,199,0.85), transparent 28%), linear-gradient(180deg, #fffdf9, #f9f5ed); text-align: center;
     }
-    .quote .who {
-        font-size: 12.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #5a6778;
-        font-weight: 600;
-        margin-bottom: 8px;
+    .verse-mark { color: var(--gold); font-size: 34px; line-height: 1; margin-bottom: 10px; }
+    .verse blockquote {
+      margin: 0 auto 12px; max-width: 36ch; color: var(--navy); font-size: clamp(24px, 3vw, 38px);
+      line-height: 1.2; letter-spacing: -0.035em; font-weight: 700;
     }
-    .quote blockquote {
-        margin: 0;
-        font-size: 19px;
-        line-height: 1.45;
-        color: #1f2933;
-        font-weight: 500;
+    .verse cite { color: var(--muted); font-style: normal; font-weight: 700; }
+    .footer-panel {
+      margin: 24px 0 48px; padding: 30px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 22px; align-items: center;
     }
-    .answer {
-        font-size: 34px;
-        font-weight: 700;
-        color: #1f7a4c;
-        letter-spacing: -0.6px;
-        margin-top: 14px;
-        line-height: 1.15;
+    .footer-panel h3 { color: var(--navy); font-size: 28px; margin-bottom: 8px; letter-spacing: -0.03em; }
+    .footer-panel p { color: var(--muted); margin-bottom: 0; }
+    .footer-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    footer.site-footer { padding: 10px 0 36px; color: var(--muted); font-size: 14px; }
+    .site-footer .container {
+      display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px;
     }
-
-    /* ===== CHART: worst case ===== */
-    .rounds {
-        background: #ffffff;
-        border: 1px solid #e3e8ef;
-        border-radius: 12px;
-        padding: 26px 28px 22px;
-        position: relative;
+    @media (max-width: 980px) {
+      .hero-grid, .footer-panel, .grid-3 { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; }
+      .footer-actions { justify-content: flex-start; }
     }
-    .rounds-axis {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        color: #8b96a5;
-        font-variant-numeric: tabular-nums;
-        letter-spacing: 0.4px;
-        margin: 2px 0 14px;
-        padding: 0 2px;
+    @media (max-width: 760px) {
+      .nav { min-height: 68px; }
+      .nav-links { display: none; }
+      .hero-copy { padding: 34px 24px; }
+      .hero-meta { grid-template-columns: 1fr; }
+      .schedule-item { grid-template-columns: 1fr; gap: 6px; }
+      .schedule-time { white-space: normal; }
     }
-    .round {
-        margin-bottom: 22px;
-    }
-    .round:last-child { margin-bottom: 4px; }
-    .round-label {
-        font-size: 12.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #5a6778;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-    .bar-track {
-        position: relative;
-        background: #f4f6f9;
-        border-radius: 6px;
-        height: 22px;
-        margin-bottom: 6px;
-        overflow: visible;
-    }
-    .bar-track:last-child { margin-bottom: 0; }
-    .bar-fill {
-        background: linear-gradient(90deg, #c9e6d5 0%, #9dcfb3 100%);
-        height: 100%;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        padding-left: 10px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #0f2a1e;
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
-    }
-    .bar-fill.slow { background: linear-gradient(90deg, #d6ecb3 0%, #bfd894 100%); }
-    .bar-badge {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        left: calc(var(--bar-w) + 10px);
-        background: #dcecdf;
-        color: #1f7a4c;
-        font-size: 10.5px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        padding: 3px 8px;
-        border-radius: 999px;
-        white-space: nowrap;
-    }
-    .bar-badge.warn {
-        background: #fdefd0;
-        color: #8a6200;
-    }
-    .threshold {
-        position: absolute;
-        top: 44px;
-        bottom: 22px;
-        left: calc(28px + (100% - 56px) * 5000 / 6000);
-        width: 1px;
-        border-left: 2px dashed #c9ced6;
-        pointer-events: none;
-    }
-    .threshold-label {
-        position: absolute;
-        top: 14px;
-        left: calc((100% - 56px) * 5000 / 6000 - 32px);
-        font-size: 10.5px;
-        color: #8b96a5;
-        font-weight: 600;
-        letter-spacing: 0.4px;
-        background: #ffffff;
-        padding: 0 4px;
-    }
-
-    /* ===== SCALING ===== */
-    .scaling-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-    }
-    .scale-card {
-        background: #ffffff;
-        border: 1px solid #e3e8ef;
-        border-radius: 12px;
-        padding: 22px 20px 24px;
-        text-align: center;
-    }
-    .scale-card .imgs {
-        font-size: 12.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #5a6778;
-        font-weight: 600;
-        margin-bottom: 6px;
-    }
-    .scale-card .ms {
-        font-size: 44px;
-        font-weight: 700;
-        color: #1a2b45;
-        font-variant-numeric: tabular-nums;
-        letter-spacing: -1px;
-        line-height: 1;
-    }
-    .scale-card .ms-unit {
-        font-size: 17px;
-        font-weight: 600;
-        color: #5a6778;
-        margin-left: 2px;
-    }
-    .scale-card .visual {
-        margin-top: 18px;
-        background: #f4f6f9;
-        border-radius: 6px;
-        height: 14px;
-        overflow: hidden;
-    }
-    .scale-card .visual-fill {
-        background: linear-gradient(90deg, #c9e6d5 0%, #9dcfb3 100%);
-        height: 100%;
-        border-radius: 6px;
-    }
-    .scaling-note {
-        text-align: center;
-        margin-top: 18px;
-        font-size: 15px;
-        color: #5a6778;
-        font-style: italic;
-    }
-    .scaling-note strong { color: #1f7a4c; font-style: normal; }
-
-    /* ===== WHY list ===== */
-    .why-list {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-    }
-    .why-item {
-        background: #ffffff;
-        border: 1px solid #e3e8ef;
-        border-radius: 10px;
-        padding: 18px 20px;
-        display: flex;
-        gap: 14px;
-        align-items: flex-start;
-    }
-    .why-num {
-        flex-shrink: 0;
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        border-radius: 999px;
-        background: #eaf5ee;
-        color: #1f7a4c;
-        font-weight: 700;
-        text-align: center;
-        font-size: 14px;
-        font-variant-numeric: tabular-nums;
-    }
-    .why-text {
-        font-size: 14.5px;
-        color: #34404f;
-        line-height: 1.45;
-    }
-    .why-text strong { color: #1a2b45; }
-
-    /* ===== FINAL CONCLUSION ===== */
-    .final {
-        background: linear-gradient(180deg, #eaf5ee 0%, #dcecdf 100%);
-        border: 1px solid #bfddc9;
-        border-radius: 16px;
-        padding: 40px 32px;
-        text-align: center;
-    }
-    .final .headline {
-        font-size: 32px;
-        font-weight: 700;
-        color: #0f2a1e;
-        letter-spacing: -0.5px;
-        line-height: 1.2;
-        margin: 0 0 14px;
-    }
-    .final .sub {
-        font-size: 15px;
-        color: #3f6a52;
-        margin: 0;
-    }
-    .final .sub code {
-        background: #ffffff;
-        color: #1f7a4c;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.95em;
-    }
-
-    /* ===== DETAILS (collapsible) ===== */
-    details.tech {
-        background: #ffffff;
-        border: 1px solid #e3e8ef;
-        border-radius: 10px;
-        padding: 0;
-        margin-bottom: 20px;
-    }
-    details.tech > summary {
-        cursor: pointer;
-        list-style: none;
-        padding: 16px 22px;
-        font-weight: 600;
-        color: #2b3a55;
-        font-size: 14.5px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    details.tech > summary::-webkit-details-marker { display: none; }
-    details.tech > summary::before {
-        content: "▶";
-        font-size: 10px;
-        color: #8b96a5;
-        transition: transform 0.15s ease;
-    }
-    details.tech[open] > summary::before { transform: rotate(90deg); }
-    details.tech .body {
-        padding: 0 22px 22px;
-        font-size: 14px;
-        color: #34404f;
-    }
-    details.tech .body h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #2b3a55;
-        margin: 18px 0 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-    }
-    details.tech .body code {
-        font-family: "SF Mono", "Menlo", "Consolas", monospace;
-        font-size: 0.88em;
-        background: #eef2f7;
-        color: #2b3a55;
-        padding: 1px 5px;
-        border-radius: 4px;
-    }
-    .setup-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px 20px;
-        font-size: 13.5px;
-    }
-    .setup-grid div {
-        padding: 6px 0;
-        border-bottom: 1px dashed #e3e8ef;
-    }
-    .setup-grid strong {
-        color: #2b3a55;
-        font-weight: 600;
-    }
-    details.tech table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        margin-top: 6px;
-    }
-    details.tech thead th {
-        background: #f1f5fa;
-        color: #2b3a55;
-        font-weight: 600;
-        text-align: left;
-        padding: 9px 10px;
-        border-bottom: 1px solid #d9e1eb;
-        font-size: 12px;
-        letter-spacing: 0.2px;
-    }
-    details.tech tbody td {
-        padding: 8px 10px;
-        border-bottom: 1px solid #eef2f7;
-        color: #34404f;
-        vertical-align: top;
-    }
-    details.tech tbody td.num {
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
-    }
-
-    /* ===== FOOTER ===== */
-    footer.foot {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 28px;
-        border-top: 1px solid #e3e8ef;
-        font-size: 12.5px;
-        color: #8b96a5;
-        text-align: center;
-    }
-    footer.foot code {
-        font-family: "SF Mono", "Menlo", "Consolas", monospace;
-        font-size: 0.92em;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 900px) {
-        .hero h1 { font-size: 40px; }
-        .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-        .kpi .value { font-size: 54px; }
-        .why-list { grid-template-columns: 1fr; }
-        .scaling-row { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 560px) {
-        .hero { padding: 40px 20px 48px; }
-        .hero h1 { font-size: 32px; letter-spacing: -0.5px; }
-        .verdict-pill { font-size: 13px; padding: 8px 18px; }
-        .kpi-row { grid-template-columns: 1fr; }
-        .kpi .value { font-size: 60px; }
-        .answer { font-size: 26px; }
-        section h2 { font-size: 22px; }
-        .final .headline { font-size: 24px; }
-        .wrapper { padding: 40px 20px 40px; }
-    }
-
-    /* ===== PRINT ===== */
-    @media print {
-        body { background: #ffffff; }
-        .hero { background: #ffffff; padding: 20px 0 30px; border-bottom: 1px solid #cfd6df; }
-        .hero h1 { font-size: 32px; }
-        .kpi .value { font-size: 44px; }
-        .wrapper { padding: 20px 0; max-width: 100%; }
-        .rounds, .scale-card, .why-item, .quote, details.tech { box-shadow: none; page-break-inside: avoid; }
-        .final { page-break-inside: avoid; }
-        details.tech[open] .body { display: block; }
-        .verdict-pill { box-shadow: none; }
-        a { color: inherit; text-decoration: none; }
-    }
-</style>
+  </style>
 </head>
 <body>
-<section class="hero"><div class="hero-inner"><div class="verdict-pill">✅ Veredicto: el servidor aguanta</div><h1>El servidor procesó <em>1000 imágenes</em> en el peor caso(4 workers × 50 imgs en paralelo) <em>sin un solo OOM</em>.</h1><div class="sub-hint">TL;DR — podés dejar de leer acá ↓</div><div class="kpi-row"><div class="kpi"><div class="icon">✅</div><div class="value">100%</div><div class="label">Requests exitosos</div></div><div class="kpi"><div class="icon">🛡️</div><div class="value">0</div><div class="label">OOM / crashes</div></div><div class="kpi neutral"><div class="icon">🖼️</div><div class="value">1000</div><div class="label">Imágenes procesadas</div></div><div class="kpi neutral"><div class="icon">⚡</div><div class="value">~4<span style="font-size:32px;letter-spacing:-0.5px">s</span></div><div class="label">Latencia pico worst-case</div></div></div></div></section><div class="wrapper"><section><h2><span class="num">1</span>La pregunta del TL</h2><div class="quote"><div class="who">· TL</div><blockquote>"Hay que tener en cuenta que el peor caso sería que cada worker tenga 50 imágenes corriendo, hay que verificar que no nos quedemos sin memoria."</blockquote><div class="answer">No. Acá los datos. ↓</div></div></section><section><h2><span class="num">2</span>Worst case — 4 × 50 imgs concurrentes, 5 rondas</h2><p style="margin-bottom:18px;color:#5a6778">Cada barra es un request. 4 requests simultáneos por ronda. Todas las rondas HTTP 200. Ancho proporcional a la latencia.</p><div class="rounds"><div class="rounds-axis tabular"><span>0 ms</span><span>1500</span><span>3000</span><span>4500</span><span>6000 ms</span></div><div class="round"><div class="round-label">Ronda 1</div><div class="bar-track"><div class="bar-fill" style="width:59.2%">3551 ms</div><div class="bar-badge" style="--bar-w:59.2%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:60.5%">3630 ms</div><div class="bar-badge" style="--bar-w:60.5%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.2%">3852 ms</div><div class="bar-badge" style="--bar-w:64.2%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.5%">3872 ms</div><div class="bar-badge" style="--bar-w:64.5%">200 OK</div></div></div><div class="round"><div class="round-label">Ronda 2</div><div class="bar-track"><div class="bar-fill" style="width:60.6%">3638 ms</div><div class="bar-badge" style="--bar-w:60.6%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.1%">3847 ms</div><div class="bar-badge" style="--bar-w:64.1%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.7%">3880 ms</div><div class="bar-badge" style="--bar-w:64.7%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:82.2%">4930 ms</div><div class="bar-badge warn" style="--bar-w:82.2%">200 · 1 CDN 422</div></div></div><div class="round"><div class="round-label">Ronda 3</div><div class="bar-track"><div class="bar-fill" style="width:57.1%">3426 ms</div><div class="bar-badge" style="--bar-w:57.1%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:61.5%">3688 ms</div><div class="bar-badge" style="--bar-w:61.5%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:63.7%">3820 ms</div><div class="bar-badge" style="--bar-w:63.7%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:78.1%">4684 ms</div><div class="bar-badge" style="--bar-w:78.1%">200 OK</div></div></div><div class="round"><div class="round-label">Ronda 4</div><div class="bar-track"><div class="bar-fill" style="width:55.4%">3324 ms</div><div class="bar-badge" style="--bar-w:55.4%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:56.5%">3387 ms</div><div class="bar-badge" style="--bar-w:56.5%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:77.1%">4628 ms</div><div class="bar-badge" style="--bar-w:77.1%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:77.6%">4656 ms</div><div class="bar-badge" style="--bar-w:77.6%">200 OK</div></div></div><div class="round"><div class="round-label">Ronda 5</div><div class="bar-track"><div class="bar-fill" style="width:41.7%">2500 ms</div><div class="bar-badge" style="--bar-w:41.7%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:46.0%">2760 ms</div><div class="bar-badge" style="--bar-w:46.0%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.3%">3857 ms</div><div class="bar-badge" style="--bar-w:64.3%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:89.5%">5371 ms</div><div class="bar-badge" style="--bar-w:89.5%">200 OK</div></div></div></div><p style="margin-top:18px;color:#5a6778;font-size:14.5px"><strong style="color:#1a2b45">20 / 20 HTTP 200.</strong> Pico absoluto: 5.37 s. Promedio: ~3.9 s. Sin degradación entre rondas.</p></section><section><h2><span class="num">3</span>Escalado por tamaño de batch</h2><p style="margin-bottom:20px;color:#5a6778">1 cliente, batch incremental. Duplicar imágenes duplica el tiempo — no hay cliff ni knee.</p><div class="scaling-row"><div class="scale-card"><div class="imgs">10 imgs</div><div><span class="ms">783</span><span class="ms-unit">ms</span></div><div class="visual"><div class="visual-fill" style="width:30.4%"></div></div></div><div class="scale-card"><div class="imgs">25 imgs</div><div><span class="ms">1486</span><span class="ms-unit">ms</span></div><div class="visual"><div class="visual-fill" style="width:57.7%"></div></div></div><div class="scale-card"><div class="imgs">50 imgs</div><div><span class="ms">2576</span><span class="ms-unit">ms</span></div><div class="visual"><div class="visual-fill" style="width:100%"></div></div></div></div><div class="scaling-note">La latencia escala <strong>linealmente</strong>. No hay cliff ni knee en el rango probado.</div></section><section><h2><span class="num">4</span>Por qué no se satura</h2><div class="why-list"><div class="why-item"><div class="why-num">1</div><div class="why-text"><strong>Chunking GPU interno (32 imgs)</strong> dentro de <code style="font-size:0.9em;background:#eef2f7;padding:1px 4px;border-radius:3px">predict_batch</code> limita el pico de activaciones por worker, incluso cuando llegan 50.</div></div><div class="why-item"><div class="why-num">2</div><div class="why-text"><strong>CUDA serializa kernels.</strong> Los 4 workers no compiten realmente por la GPU — se turnan, no explotan en paralelo.</div></div><div class="why-item"><div class="why-num">3</div><div class="why-text"><strong>Gateway CIF ratelimita ~3 concurrent.</strong> Actúa como circuit breaker natural antes de llegar a escenarios patológicos.</div></div><div class="why-item"><div class="why-num">4</div><div class="why-text"><strong>GPU suficiente.</strong> El hardware actual tolera 4× pesos del modelo (~680 MB) + activaciones pico (~4-10 GB) sin margen crítico.</div></div></div></section><section><h2><span class="num">5</span>Detalles técnicos</h2><p style="color:#5a6778;margin-bottom:18px">Expandí si querés el setup, la metodología o los datos crudos del Test 1.</p></section><section><div class="final"><div class="headline"><code style="background:#ffffff;color:#1f7a4c;padding:4px 10px;border-radius:6px;font-size:0.9em">MAX_BATCH_SIZE = 50</code> es seguro. No hace falta ajustar nada.</div><p class="sub">Si querés margen extra ante GPUs más chicas: bajar chunk GPU de 32 → 24 en <code>models.py::predict_batch</code>.</p></div></section></div><footer class="foot"><strong>Stress Test Report</strong> · <code>/predict_cif_batch</code> · scope staging<br>Juan David Arango &lt;gt; · 2026-04-16</footer></body></html>
+  <header class="site-header">
+    <div class="container nav">
+      <a href="#inicio" class="brand">
+        <span class="brand-mark">✦</span>
+        <span>Sendas de Gracia<small>Iglesia cristiana</small></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#nosotros">Nosotros</a>
+        <a href="#reuniones">Reuniones</a>
+        <a href="#ministerios">Ministerios</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+      <a class="btn btn-primary" href="#contacto">Visítanos</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Bienvenidos a casa</div>
+          <h1>Una comunidad centrada en Cristo, su Palabra y su gracia.</h1>
+          <p class="lead">
+            Mockup inicial para la web de <strong>Sendas de Gracia</strong>. Un sitio sobrio, cálido y claro para presentar la iglesia,
+            sus reuniones, ministerios y canales de contacto.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#reuniones">Ver horarios</a>
+            <a class="btn btn-secondary" href="#nosotros">Conócenos</a>
+          </div>
+          <div class="hero-meta">
+            <div class="meta-item"><div class="meta-label">Reunión principal</div><div class="meta-value">Domingos · 10:00 AM</div></div>
+            <div class="meta-item"><div class="meta-label">Ubicación</div><div class="meta-value">Ciudad / dirección por definir</div></div>
+            <div class="meta-item"><div class="meta-label">Enfoque</div><div class="meta-value">Predicación bíblica y comunión</div></div>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <div class="hero-visual">
+            <div class="visual-overlay">
+              <strong>"Lámpara es a mis pies tu palabra"</strong>
+              <span>Un diseño sereno para comunicar verdad, reverencia y cercanía.</span>
+            </div>
+          </div>
+          <div class="hero-body">
+            <h3>Una presencia digital sencilla y digna</h3>
+            <p>Este mockup está pensado para que luego puedas agregar sermones, ubicación real, enlaces a YouTube, WhatsApp, donaciones o formulario de contacto.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="nosotros">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Quiénes somos</h2>
+            <p>Una iglesia local que anhela glorificar a Dios, edificar a los santos y anunciar el evangelio con fidelidad, amor y convicción.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="card"><div class="card-icon">✝</div><h3>Cristo al centro</h3><p>Buscamos que todo en la vida de la iglesia apunte a la supremacía, la obra y la gracia del Señor Jesucristo.</p></article>
+          <article class="card"><div class="card-icon">📖</div><h3>Predicación bíblica</h3><p>La Escritura gobierna nuestra enseñanza, nuestra adoración y nuestra visión de la vida cristiana.</p></article>
+          <article class="card"><div class="card-icon">🤝</div><h3>Comunidad real</h3><p>Queremos ser una familia espiritual donde se cultive la santidad, el servicio y el amor fraternal.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="reuniones">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Reuniones y horarios</h2>
+            <p>Textos de ejemplo. Luego puedes reemplazar estos horarios por los reales de la iglesia.</p>
+          </div>
+        </div>
+        <div class="schedule">
+          <div class="schedule-list">
+            <div class="schedule-item"><div class="schedule-day">Domingo</div><div><div class="schedule-title">Culto de adoración</div><div class="schedule-sub">Predicación expositiva, oración congregacional y comunión</div></div><div class="schedule-time">10:00 AM</div></div>
+            <div class="schedule-item"><div class="schedule-day">Miércoles</div><div><div class="schedule-title">Estudio bíblico</div><div class="schedule-sub">Espacio de enseñanza, preguntas y crecimiento en la Palabra</div></div><div class="schedule-time">7:00 PM</div></div>
+            <div class="schedule-item"><div class="schedule-day">Sábado</div><div><div class="schedule-title">Oración y jóvenes</div><div class="schedule-sub">Encuentro para discipulado, oración y vida en comunidad</div></div><div class="schedule-time">5:00 PM</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ministerios">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Ministerios</h2>
+            <p>Un bloque simple para presentar las áreas principales de servicio de la congregación.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="card"><div class="card-icon">👨‍👩‍👧‍👦</div><h3>Familias</h3><p>Acompañamiento pastoral y formación bíblica para matrimonios, padres e hijos.</p></article>
+          <article class="card"><div class="card-icon">🌱</div><h3>Niños y jóvenes</h3><p>Espacios de discipulado enfocados en la verdad, el carácter y la vida piadosa.</p></article>
+          <article class="card"><div class="card-icon">🌍</div><h3>Misiones y servicio</h3><p>Oportunidades para servir a la iglesia local y extender el testimonio del evangelio.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="verse">
+          <div class="verse-mark">“</div>
+          <blockquote>Permaneced firmes en la gracia, creciendo en el conocimiento de nuestro Señor Jesucristo.</blockquote>
+          <cite>Texto de referencia editable para el mockup</cite>
+        </div>
+      </div>
+    </section>
+
+    <section id="contacto">
+      <div class="container footer-panel">
+        <div>
+          <h3>Nos encantará recibirte</h3>
+          <p>Aquí luego puedes poner dirección real, mapa, WhatsApp, correo, Instagram, YouTube o un formulario. Por ahora, este bloque deja lista la estructura visual de contacto.</p>
+        </div>
+        <div class="footer-actions">
+          <a class="btn btn-primary" href="mailto:contacto@sendasdegracia.org">Escríbenos</a>
+          <a class="btn btn-secondary" href="https://wa.me/" target="_blank" rel="noreferrer">WhatsApp</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>© 2026 Sendas de Gracia · Mockup inicial</span>
+      <span>Hecho como sitio estático en GitHub Pages</span>
+    </div>
+  </footer>
+</body>
+</html>
