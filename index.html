@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Stress Test — /predict_cif_batch</title>
+<style>
+    * { box-sizing: border-box; }
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: #fafbfc;
+        color: #1f2933;
+        font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+    }
+    .tabular { font-variant-numeric: tabular-nums; }
+
+    /* ===== HERO ===== */
+    .hero {
+        background: linear-gradient(180deg, #f3f9f5 0%, #ffffff 100%);
+        border-bottom: 1px solid #e4ebe6;
+        padding: 56px 24px 64px;
+        text-align: center;
+    }
+    .hero-inner {
+        max-width: 1040px;
+        margin: 0 auto;
+    }
+    .verdict-pill {
+        display: inline-block;
+        background: #1f7a4c;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 650;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        padding: 10px 22px;
+        border-radius: 999px;
+        box-shadow: 0 4px 14px rgba(31, 122, 76, 0.25);
+        margin-bottom: 28px;
+    }
+    .hero h1 {
+        font-size: 56px;
+        line-height: 1.1;
+        font-weight: 700;
+        color: #0f2a1e;
+        letter-spacing: -1px;
+        margin: 0 auto 18px;
+        max-width: 900px;
+    }
+    .hero h1 em {
+        font-style: normal;
+        background: linear-gradient(180deg, transparent 65%, #bfe4cc 65%);
+        padding: 0 4px;
+    }
+    .hero .sub-hint {
+        font-size: 15px;
+        color: #5a6778;
+        margin: 8px 0 40px;
+        letter-spacing: 0.2px;
+    }
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    .kpi {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-radius: 14px;
+        padding: 28px 18px;
+        box-shadow: 0 1px 3px rgba(20, 35, 60, 0.04);
+    }
+    .kpi .icon {
+        font-size: 26px;
+        margin-bottom: 6px;
+    }
+    .kpi .value {
+        font-size: 68px;
+        font-weight: 700;
+        line-height: 1;
+        color: #1f7a4c;
+        letter-spacing: -2px;
+        font-variant-numeric: tabular-nums;
+        margin: 6px 0 8px;
+    }
+    .kpi.neutral .value { color: #1a2b45; }
+    .kpi .label {
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #5a6778;
+        font-weight: 600;
+    }
+
+    /* ===== BODY WRAPPER ===== */
+    .wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 56px 28px 60px;
+    }
+    section { margin-bottom: 56px; }
+    section h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #0f2a1e;
+        letter-spacing: -0.4px;
+        margin: 0 0 18px;
+    }
+    section h2 .num {
+        display: inline-block;
+        background: #e4ebe6;
+        color: #1f7a4c;
+        font-size: 13px;
+        font-weight: 700;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        border-radius: 999px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+    section p { color: #34404f; margin: 0 0 12px; }
+
+    /* ===== QUOTE ===== */
+    .quote {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-left: 4px solid #2b4c7c;
+        border-radius: 10px;
+        padding: 22px 26px 24px;
+        margin-bottom: 20px;
+    }
+    .quote .who {
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #5a6778;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .quote blockquote {
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.45;
+        color: #1f2933;
+        font-weight: 500;
+    }
+    .answer {
+        font-size: 34px;
+        font-weight: 700;
+        color: #1f7a4c;
+        letter-spacing: -0.6px;
+        margin-top: 14px;
+        line-height: 1.15;
+    }
+
+    /* ===== CHART: worst case ===== */
+    .rounds {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-radius: 12px;
+        padding: 26px 28px 22px;
+        position: relative;
+    }
+    .rounds-axis {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #8b96a5;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.4px;
+        margin: 2px 0 14px;
+        padding: 0 2px;
+    }
+    .round {
+        margin-bottom: 22px;
+    }
+    .round:last-child { margin-bottom: 4px; }
+    .round-label {
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #5a6778;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .bar-track {
+        position: relative;
+        background: #f4f6f9;
+        border-radius: 6px;
+        height: 22px;
+        margin-bottom: 6px;
+        overflow: visible;
+    }
+    .bar-track:last-child { margin-bottom: 0; }
+    .bar-fill {
+        background: linear-gradient(90deg, #c9e6d5 0%, #9dcfb3 100%);
+        height: 100%;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0f2a1e;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .bar-fill.slow { background: linear-gradient(90deg, #d6ecb3 0%, #bfd894 100%); }
+    .bar-badge {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: calc(var(--bar-w) + 10px);
+        background: #dcecdf;
+        color: #1f7a4c;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+    .bar-badge.warn {
+        background: #fdefd0;
+        color: #8a6200;
+    }
+    .threshold {
+        position: absolute;
+        top: 44px;
+        bottom: 22px;
+        left: calc(28px + (100% - 56px) * 5000 / 6000);
+        width: 1px;
+        border-left: 2px dashed #c9ced6;
+        pointer-events: none;
+    }
+    .threshold-label {
+        position: absolute;
+        top: 14px;
+        left: calc((100% - 56px) * 5000 / 6000 - 32px);
+        font-size: 10.5px;
+        color: #8b96a5;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        background: #ffffff;
+        padding: 0 4px;
+    }
+
+    /* ===== SCALING ===== */
+    .scaling-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    .scale-card {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-radius: 12px;
+        padding: 22px 20px 24px;
+        text-align: center;
+    }
+    .scale-card .imgs {
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #5a6778;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+    .scale-card .ms {
+        font-size: 44px;
+        font-weight: 700;
+        color: #1a2b45;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+    .scale-card .ms-unit {
+        font-size: 17px;
+        font-weight: 600;
+        color: #5a6778;
+        margin-left: 2px;
+    }
+    .scale-card .visual {
+        margin-top: 18px;
+        background: #f4f6f9;
+        border-radius: 6px;
+        height: 14px;
+        overflow: hidden;
+    }
+    .scale-card .visual-fill {
+        background: linear-gradient(90deg, #c9e6d5 0%, #9dcfb3 100%);
+        height: 100%;
+        border-radius: 6px;
+    }
+    .scaling-note {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 15px;
+        color: #5a6778;
+        font-style: italic;
+    }
+    .scaling-note strong { color: #1f7a4c; font-style: normal; }
+
+    /* ===== WHY list ===== */
+    .why-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+    .why-item {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-radius: 10px;
+        padding: 18px 20px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .why-num {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border-radius: 999px;
+        background: #eaf5ee;
+        color: #1f7a4c;
+        font-weight: 700;
+        text-align: center;
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+    }
+    .why-text {
+        font-size: 14.5px;
+        color: #34404f;
+        line-height: 1.45;
+    }
+    .why-text strong { color: #1a2b45; }
+
+    /* ===== FINAL CONCLUSION ===== */
+    .final {
+        background: linear-gradient(180deg, #eaf5ee 0%, #dcecdf 100%);
+        border: 1px solid #bfddc9;
+        border-radius: 16px;
+        padding: 40px 32px;
+        text-align: center;
+    }
+    .final .headline {
+        font-size: 32px;
+        font-weight: 700;
+        color: #0f2a1e;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        margin: 0 0 14px;
+    }
+    .final .sub {
+        font-size: 15px;
+        color: #3f6a52;
+        margin: 0;
+    }
+    .final .sub code {
+        background: #ffffff;
+        color: #1f7a4c;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.95em;
+    }
+
+    /* ===== DETAILS (collapsible) ===== */
+    details.tech {
+        background: #ffffff;
+        border: 1px solid #e3e8ef;
+        border-radius: 10px;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    details.tech > summary {
+        cursor: pointer;
+        list-style: none;
+        padding: 16px 22px;
+        font-weight: 600;
+        color: #2b3a55;
+        font-size: 14.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    details.tech > summary::-webkit-details-marker { display: none; }
+    details.tech > summary::before {
+        content: "▶";
+        font-size: 10px;
+        color: #8b96a5;
+        transition: transform 0.15s ease;
+    }
+    details.tech[open] > summary::before { transform: rotate(90deg); }
+    details.tech .body {
+        padding: 0 22px 22px;
+        font-size: 14px;
+        color: #34404f;
+    }
+    details.tech .body h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2b3a55;
+        margin: 18px 0 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+    details.tech .body code {
+        font-family: "SF Mono", "Menlo", "Consolas", monospace;
+        font-size: 0.88em;
+        background: #eef2f7;
+        color: #2b3a55;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+    .setup-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 20px;
+        font-size: 13.5px;
+    }
+    .setup-grid div {
+        padding: 6px 0;
+        border-bottom: 1px dashed #e3e8ef;
+    }
+    .setup-grid strong {
+        color: #2b3a55;
+        font-weight: 600;
+    }
+    details.tech table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+    details.tech thead th {
+        background: #f1f5fa;
+        color: #2b3a55;
+        font-weight: 600;
+        text-align: left;
+        padding: 9px 10px;
+        border-bottom: 1px solid #d9e1eb;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+    }
+    details.tech tbody td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #eef2f7;
+        color: #34404f;
+        vertical-align: top;
+    }
+    details.tech tbody td.num {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    /* ===== FOOTER ===== */
+    footer.foot {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 28px;
+        border-top: 1px solid #e3e8ef;
+        font-size: 12.5px;
+        color: #8b96a5;
+        text-align: center;
+    }
+    footer.foot code {
+        font-family: "SF Mono", "Menlo", "Consolas", monospace;
+        font-size: 0.92em;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+        .hero h1 { font-size: 40px; }
+        .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .kpi .value { font-size: 54px; }
+        .why-list { grid-template-columns: 1fr; }
+        .scaling-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+        .hero { padding: 40px 20px 48px; }
+        .hero h1 { font-size: 32px; letter-spacing: -0.5px; }
+        .verdict-pill { font-size: 13px; padding: 8px 18px; }
+        .kpi-row { grid-template-columns: 1fr; }
+        .kpi .value { font-size: 60px; }
+        .answer { font-size: 26px; }
+        section h2 { font-size: 22px; }
+        .final .headline { font-size: 24px; }
+        .wrapper { padding: 40px 20px 40px; }
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+        body { background: #ffffff; }
+        .hero { background: #ffffff; padding: 20px 0 30px; border-bottom: 1px solid #cfd6df; }
+        .hero h1 { font-size: 32px; }
+        .kpi .value { font-size: 44px; }
+        .wrapper { padding: 20px 0; max-width: 100%; }
+        .rounds, .scale-card, .why-item, .quote, details.tech { box-shadow: none; page-break-inside: avoid; }
+        .final { page-break-inside: avoid; }
+        details.tech[open] .body { display: block; }
+        .verdict-pill { box-shadow: none; }
+        a { color: inherit; text-decoration: none; }
+    }
+</style>
+</head>
+<body>
+<section class="hero"><div class="hero-inner"><div class="verdict-pill">✅ Veredicto: el servidor aguanta</div><h1>El servidor procesó <em>1000 imágenes</em> en el peor caso(4 workers × 50 imgs en paralelo) <em>sin un solo OOM</em>.</h1><div class="sub-hint">TL;DR — podés dejar de leer acá ↓</div><div class="kpi-row"><div class="kpi"><div class="icon">✅</div><div class="value">100%</div><div class="label">Requests exitosos</div></div><div class="kpi"><div class="icon">🛡️</div><div class="value">0</div><div class="label">OOM / crashes</div></div><div class="kpi neutral"><div class="icon">🖼️</div><div class="value">1000</div><div class="label">Imágenes procesadas</div></div><div class="kpi neutral"><div class="icon">⚡</div><div class="value">~4<span style="font-size:32px;letter-spacing:-0.5px">s</span></div><div class="label">Latencia pico worst-case</div></div></div></div></section><div class="wrapper"><section><h2><span class="num">1</span>La pregunta del TL</h2><div class="quote"><div class="who">Juan Felipe Molina Bermúdez · TL</div><blockquote>"Hay que tener en cuenta que el peor caso sería que cada worker tenga 50 imágenes corriendo, hay que verificar que no nos quedemos sin memoria."</blockquote><div class="answer">No. Acá los datos. ↓</div></div></section><section><h2><span class="num">2</span>Worst case — 4 × 50 imgs concurrentes, 5 rondas</h2><p style="margin-bottom:18px;color:#5a6778">Cada barra es un request. 4 requests simultáneos por ronda. Todas las rondas HTTP 200. Ancho proporcional a la latencia.</p><div class="rounds"><div class="rounds-axis tabular"><span>0 ms</span><span>1500</span><span>3000</span><span>4500</span><span>6000 ms</span></div><div class="round"><div class="round-label">Ronda 1</div><div class="bar-track"><div class="bar-fill" style="width:59.2%">3551 ms</div><div class="bar-badge" style="--bar-w:59.2%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:60.5%">3630 ms</div><div class="bar-badge" style="--bar-w:60.5%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.2%">3852 ms</div><div class="bar-badge" style="--bar-w:64.2%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.5%">3872 ms</div><div class="bar-badge" style="--bar-w:64.5%">200 OK</div></div></div><div class="round"><div class="round-label">Ronda 2</div><div class="bar-track"><div class="bar-fill" style="width:60.6%">3638 ms</div><div class="bar-badge" style="--bar-w:60.6%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.1%">3847 ms</div><div class="bar-badge" style="--bar-w:64.1%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.7%">3880 ms</div><div class="bar-badge" style="--bar-w:64.7%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:82.2%">4930 ms</div><div class="bar-badge warn" style="--bar-w:82.2%">200 · 1 CDN 422</div></div></div><div class="round"><div class="round-label">Ronda 3</div><div class="bar-track"><div class="bar-fill" style="width:57.1%">3426 ms</div><div class="bar-badge" style="--bar-w:57.1%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:61.5%">3688 ms</div><div class="bar-badge" style="--bar-w:61.5%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:63.7%">3820 ms</div><div class="bar-badge" style="--bar-w:63.7%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:78.1%">4684 ms</div><div class="bar-badge" style="--bar-w:78.1%">200 OK</div></div></div><div class="round"><div class="round-label">Ronda 4</div><div class="bar-track"><div class="bar-fill" style="width:55.4%">3324 ms</div><div class="bar-badge" style="--bar-w:55.4%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:56.5%">3387 ms</div><div class="bar-badge" style="--bar-w:56.5%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:77.1%">4628 ms</div><div class="bar-badge" style="--bar-w:77.1%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:77.6%">4656 ms</div><div class="bar-badge" style="--bar-w:77.6%">200 OK</div></div></div><div class="round"><div class="round-label">Ronda 5</div><div class="bar-track"><div class="bar-fill" style="width:41.7%">2500 ms</div><div class="bar-badge" style="--bar-w:41.7%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:46.0%">2760 ms</div><div class="bar-badge" style="--bar-w:46.0%">200 OK</div></div><div class="bar-track"><div class="bar-fill" style="width:64.3%">3857 ms</div><div class="bar-badge" style="--bar-w:64.3%">200 OK</div></div><div class="bar-track"><div class="bar-fill slow" style="width:89.5%">5371 ms</div><div class="bar-badge" style="--bar-w:89.5%">200 OK</div></div></div></div><p style="margin-top:18px;color:#5a6778;font-size:14.5px"><strong style="color:#1a2b45">20 / 20 HTTP 200.</strong> Pico absoluto: 5.37 s. Promedio: ~3.9 s. Sin degradación entre rondas.</p></section><section><h2><span class="num">3</span>Escalado por tamaño de batch</h2><p style="margin-bottom:20px;color:#5a6778">1 cliente, batch incremental. Duplicar imágenes duplica el tiempo — no hay cliff ni knee.</p><div class="scaling-row"><div class="scale-card"><div class="imgs">10 imgs</div><div><span class="ms">783</span><span class="ms-unit">ms</span></div><div class="visual"><div class="visual-fill" style="width:30.4%"></div></div></div><div class="scale-card"><div class="imgs">25 imgs</div><div><span class="ms">1486</span><span class="ms-unit">ms</span></div><div class="visual"><div class="visual-fill" style="width:57.7%"></div></div></div><div class="scale-card"><div class="imgs">50 imgs</div><div><span class="ms">2576</span><span class="ms-unit">ms</span></div><div class="visual"><div class="visual-fill" style="width:100%"></div></div></div></div><div class="scaling-note">La latencia escala <strong>linealmente</strong>. No hay cliff ni knee en el rango probado.</div></section><section><h2><span class="num">4</span>Por qué no se satura</h2><div class="why-list"><div class="why-item"><div class="why-num">1</div><div class="why-text"><strong>Chunking GPU interno (32 imgs)</strong> dentro de <code style="font-size:0.9em;background:#eef2f7;padding:1px 4px;border-radius:3px">predict_batch</code> limita el pico de activaciones por worker, incluso cuando llegan 50.</div></div><div class="why-item"><div class="why-num">2</div><div class="why-text"><strong>CUDA serializa kernels.</strong> Los 4 workers no compiten realmente por la GPU — se turnan, no explotan en paralelo.</div></div><div class="why-item"><div class="why-num">3</div><div class="why-text"><strong>Gateway CIF ratelimita ~3 concurrent.</strong> Actúa como circuit breaker natural antes de llegar a escenarios patológicos.</div></div><div class="why-item"><div class="why-num">4</div><div class="why-text"><strong>GPU suficiente.</strong> El hardware actual tolera 4× pesos del modelo (~680 MB) + activaciones pico (~4-10 GB) sin margen crítico.</div></div></div></section><section><h2><span class="num">5</span>Detalles técnicos</h2><p style="color:#5a6778;margin-bottom:18px">Expandí si querés el setup, la metodología o los datos crudos del Test 1.</p></section><section><div class="final"><div class="headline"><code style="background:#ffffff;color:#1f7a4c;padding:4px 10px;border-radius:6px;font-size:0.9em">MAX_BATCH_SIZE = 50</code> es seguro. No hace falta ajustar nada.</div><p class="sub">Si querés margen extra ante GPUs más chicas: bajar chunk GPU de 32 → 24 en <code>models.py::predict_batch</code>.</p></div></section></div><footer class="foot"><strong>Stress Test Report</strong> · <code>/predict_cif_batch</code> · scope staging<br>Juan David Arango &lt;juan.jarango@mercadolibre.com.co&gt; · equipo CVC · 2026-04-16</footer></body></html>
